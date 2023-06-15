@@ -1,0 +1,150 @@
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://weemaophin:!Aa00045678@assignment1.jnbjfx4.mongodb.net/?retryWrites=true&w=majority";
+const express = require('express')
+const jwt = require('jsonwebtoken');
+const app = express()
+const port = 3000;
+
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    app.use(express.json());
+    app.listen(port, () => {
+      console.log(`Server listening at http://localhost:${port}`);
+  });
+
+    app.post('/register1', async(req, res) => {
+      let data = req.body
+      const result = await client.db("visitor-management-system").collection("Users").insertOne({
+        data
+        //role:'Admin'
+      })    
+      res.send(generateToken1(data))
+    });
+
+  } finally {
+    // Ensures that the client will close when you finish/error
+    //await client.close();
+  }
+}
+run().catch(console.dir);
+
+/*
+app.post('/register', verifyToken, async(req, res) => {
+  let data = req.body
+  data.password = await encryptPassword(data.password)
+  if(req.Users.role == 'Admin') {
+    const result = await client.db("visitor-management-system").collection("Users").insertOne({
+      data,
+      role:'Host'
+    })
+  }
+
+  if(req.user.role == 'Host') {
+    const result = await client.db("visitor-management-system").collection("Users").insertOne({
+      data,
+      role:'Visitor',
+      Host:'req.user.email'
+  }
+    //res.send(generateToken(data))
+    )
+  }
+})
+ 
+app.get('/Read', verifyToken, async (req, res) => {
+  if(req.Users.role == 'Admin') {
+    result = await client.db('visitor-management-system').collection('Users').find()
+    console.log(result)
+    result = await client.db('visitor-management-system').collection('Record').find()
+    console.log(result)
+  }
+
+  if (req.Users.role == 'Host') {
+    result = await client.db('visitor-management-system').collection('Users').find({email: req.user.email})
+    if (result) { 
+      console.log(result);
+   } else {
+      console.log(`No listings found with the username '${req.user.email}'`);
+   }
+  }
+})
+
+
+app.patch('/update', verifyToken, async (req, res) => {
+  if(req.User.role == 'Host') {
+    
+  }
+
+  if(req.Users.role == 'Visitor') {
+
+  }
+})
+
+//To generate token
+function generateToken(userProfile){
+  return jwt.sign(
+  userProfile,    //this is an obj
+  'PW',           //password
+  { expiresIn: '1h' });  //expires after 1 hour
+}
+*/
+async function generateToken1(userProfile){
+  return jwt.sign(
+  userProfile,    //this is an obj
+  'PW',  //password
+  { expiresIn: '1h' }
+  );     
+}
+
+app.post('/register1', async(req, res) => {
+  let data = req.body
+  const result = await client.db("visitor-management-system").collection("Users").insertOne({
+    data,
+    role:'Admin'
+  })    
+  res.send(generateToken1(data))
+})
+/*
+//to verify JWT Token
+function verifyToken(req, res, next){
+  let header = req.headers.authorization
+  //to paste it in the cmd
+  console.log(header);
+
+  //split the bearer token 
+  // take the index 1 , to exclude the bearer words
+  let token = header.split(' ')[1];
+  // secret verify must be same with secret in the generated
+  jwt.verify(token, 'secret', function(err, decoded){
+      if(err){
+          res.send('Invalid token')
+      }
+      //req.user = decoded
+      console.log(decoded);
+      //so that can return req.user to use in the client 
+      req.user = decoded
+      next()
+  });
+}
+
+async function encryptPassword(password) {
+  const hash = await bcrypt.hash(password, saltRounds);  
+  return hash
+}
+*/
