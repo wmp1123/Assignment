@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, MongoCursorInUseError } = require('mongodb');
 const uri = "mongodb+srv://weemaophin:!Aa00045678@assignment1.jnbjfx4.mongodb.net/?retryWrites=true&w=majority";
 const express = require('express')
 const jwt = require('jsonwebtoken');
@@ -29,14 +29,22 @@ async function run() {
       console.log(`Server listening at http://localhost:${port}`);
   });
 
-    app.post('/register1', async(req, res) => {
-      let data = req.body
-      const result = await client.db("visitor-management-system").collection("Users").insertOne({
-        data
-        //role:'Admin'
-      })    
-      res.send(generateToken1(data))
-    });
+    app.post('/register', verifyToken, async (req, res) => {
+      let data1 = req.user,
+      data = req.body
+      res.send(await register(client, data, data1))
+      //data.password = await encryptPassword(data.password)
+    }) 
+
+    app.post('/login1', async (req, res) => {
+      let data = req.body,
+      returned = await login(client, data),
+      role = returned.temporary
+      token = returned.token
+
+      res.send({'You are logged in as ':role})
+      console.log(token)
+    })
 
   } finally {
     // Ensures that the client will close when you finish/error
@@ -46,26 +54,7 @@ async function run() {
 run().catch(console.dir);
 
 /*
-app.post('/register', verifyToken, async(req, res) => {
-  let data = req.body
-  data.password = await encryptPassword(data.password)
-  if(req.Users.role == 'Admin') {
-    const result = await client.db("visitor-management-system").collection("Users").insertOne({
-      data,
-      role:'Host'
-    })
-  }
 
-  if(req.user.role == 'Host') {
-    const result = await client.db("visitor-management-system").collection("Users").insertOne({
-      data,
-      role:'Visitor',
-      Host:'req.user.email'
-  }
-    //res.send(generateToken(data))
-    )
-  }
-})
  
 app.get('/Read', verifyToken, async (req, res) => {
   if(req.Users.role == 'Admin') {
@@ -95,32 +84,60 @@ app.patch('/update', verifyToken, async (req, res) => {
 
   }
 })
+*/
 
 //To generate token
 function generateToken(userProfile){
   return jwt.sign(
   userProfile,    //this is an obj
-  'PW',           //password
+  'mypassword',           //password
   { expiresIn: '1h' });  //expires after 1 hour
 }
-*/
-async function generateToken1(userProfile){
-  return jwt.sign(
-  userProfile,    //this is an obj
-  'PW',  //password
-  { expiresIn: '1h' }
-  );     
+
+function register1(client, data) {
+  const result = client.db("visitor-management-system").collection("Users").insertOne(data);
 }
 
-app.post('/register1', async(req, res) => {
-  let data = req.body
-  const result = await client.db("visitor-management-system").collection("Users").insertOne({
-    data,
-    role:'Admin'
-  })    
-  res.send(generateToken1(data))
-})
-/*
+async function login(client, data) {
+  let match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
+  temporary = match.role
+  if (match) {
+    const result = data.password === match.password
+    if (result) {
+      token = generateToken(match)
+      return {token, temporary}
+    } else {
+      return "Wrong password"
+    }
+  } else {
+    return "User not found"
+  }
+}
+
+async function register(client, data, data1){
+  if(data1.role == 'Admin') {
+    console.log(data)
+    const result = await client.db("visitor-management-system").collection("Users").insertOne({
+      username:data.username,
+      password:data.password,
+      name:data.name,
+      email:data.email,
+      role:'Host'
+    })
+  }
+
+  if(data1.role == 'Host') {
+    const result = await client.db("visitor-management-system").collection("Users").insertOne({
+      username:data.username,
+      password:data.password,
+      name:data.name,
+      email:data.email,
+      role:'Visitor',
+      host:data1.username
+    })
+  }
+}
+
 //to verify JWT Token
 function verifyToken(req, res, next){
   let header = req.headers.authorization
@@ -131,11 +148,10 @@ function verifyToken(req, res, next){
   // take the index 1 , to exclude the bearer words
   let token = header.split(' ')[1];
   // secret verify must be same with secret in the generated
-  jwt.verify(token, 'secret', function(err, decoded){
+  jwt.verify(token, 'mypassword', function(err, decoded){
       if(err){
           res.send('Invalid token')
       }
-      //req.user = decoded
       console.log(decoded);
       //so that can return req.user to use in the client 
       req.user = decoded
@@ -147,4 +163,4 @@ async function encryptPassword(password) {
   const hash = await bcrypt.hash(password, saltRounds);  
   return hash
 }
-*/
+

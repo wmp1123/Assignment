@@ -2,10 +2,30 @@ POST http://localhost:3000/register1
 Content-Type: application/json
 
 {
-    "AdminID":"A1",
-    "Password":"1234",
-    "Name":"Boss",
-    "Email":"Admin@gmail.com"
+    "username":"A_1",
+    "password":"1234",
+    "name":"Boss",
+    "email":"Admin@gmail.com",
+    "role":"Admin"
 }
 
 ###
+POST http://localhost:3000/login1
+Content-Type: application/json
+
+{
+    "username":"H_1",
+    "password":"1234"
+}
+
+###
+POST http://localhost:3000/register
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiNDRiM2ViODA5ZTk5Y2EwNDg5MzciLCJ1c2VybmFtZSI6IkhfMSIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJFbXBsb3llZSIsImVtYWlsIjoiSG9zdEBnbWFpbC5jb20iLCJyb2xlIjoiSG9zdCIsImlhdCI6MTY4Njg0ODc1NywiZXhwIjoxNjg2ODUyMzU3fQ.oYSqUUdTYxv2hczp95fjEss0T1xkp2x_uTalgfmu5k0
+Content-Type: application/json
+
+{
+    "username":"V_1",
+    "password":"1234",
+    "name":"Visitor",
+    "email":"Visitor@gmail.com"
+}
