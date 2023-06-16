@@ -1,8 +1,8 @@
 const { MongoClient, ServerApiVersion, MongoCursorInUseError } = require('mongodb');
 const uri = "mongodb+srv://weemaophin:!Aa00045678@assignment1.jnbjfx4.mongodb.net/?retryWrites=true&w=majority";
-const express = require('express')
+const express = require('express');
 const jwt = require('jsonwebtoken');
-const app = express()
+const app = express();
 const port = 3000;
 
 
@@ -27,18 +27,17 @@ async function run() {
     app.use(express.json());
     app.listen(port, () => {
       console.log(`Server listening at http://localhost:${port}`);
-  });
+    });
 
-    app.post('/register', verifyToken, async (req, res) => {
-      let data1 = req.user,
-      data = req.body
-      res.send(await register(client, data, data1))
-      //data.password = await encryptPassword(data.password)
+    app.post('/registerAdmin', async (req, res) => {
+    let data = req.body
+    res.send(await registerAdmin(client, data))
+    //data.password = await encryptPassword(data.password)
     }) 
 
     app.post('/login1', async (req, res) => {
       let data = req.body,
-      returned = await login(client, data),
+      returned = await login(client, data)
       role = returned.temporary
       token = returned.token
 
@@ -46,45 +45,50 @@ async function run() {
       console.log(token)
     })
 
+    app.post('/register', verifyToken, async (req, res) => {
+      let data = req.user,
+      data1 = req.body
+      res.send(await register(client, data, data1))
+      //data.password = await encryptPassword(data.password)
+    }) 
+
+    app.get('/read', verifyToken, async (req, res) => {
+      let data = req.user
+      res.send(await read(client, data))
+      //data.password = await encryptPassword(data.password)
+    }) 
+
+    app.patch('/update', verifyToken, async (req,res) => {
+      let data = req.user,
+      data1 = req.body
+      res.send(await update(client, data, data1))
+    })
+
+    app.delete('/deleteUser', verifyToken, async(req,res) => {
+      let data = req.user
+      res.send(await deleteUser(client, data))
+    })
+
+    app.post('/checkIn', verifyToken, async(req,res) => {
+      let data = req.user,
+      data1 = req.body
+      res.send(await checkIn(client, data, data1 ))
+    })
+
+    app.patch('/checkOut', async(req,res) => {
+      let data = req.body
+      res.send(await checkOut(client, data))
+    })
+
+  } catch (e) {
+    console.error(e);
+
   } finally {
     // Ensures that the client will close when you finish/error
     //await client.close();
   }
 }
-run().catch(console.dir);
-
-/*
-
- 
-app.get('/Read', verifyToken, async (req, res) => {
-  if(req.Users.role == 'Admin') {
-    result = await client.db('visitor-management-system').collection('Users').find()
-    console.log(result)
-    result = await client.db('visitor-management-system').collection('Record').find()
-    console.log(result)
-  }
-
-  if (req.Users.role == 'Host') {
-    result = await client.db('visitor-management-system').collection('Users').find({email: req.user.email})
-    if (result) { 
-      console.log(result);
-   } else {
-      console.log(`No listings found with the username '${req.user.email}'`);
-   }
-  }
-})
-
-
-app.patch('/update', verifyToken, async (req, res) => {
-  if(req.User.role == 'Host') {
-    
-  }
-
-  if(req.Users.role == 'Visitor') {
-
-  }
-})
-*/
+run().catch(console.error);
 
 //To generate token
 function generateToken(userProfile){
@@ -94,8 +98,8 @@ function generateToken(userProfile){
   { expiresIn: '1h' });  //expires after 1 hour
 }
 
-function register1(client, data) {
-  const result = client.db("visitor-management-system").collection("Users").insertOne(data);
+async function registerAdmin(client, data) {
+  const result = await client.db("visitor-management-system").collection("Users").insertOne(data);
 }
 
 async function login(client, data) {
@@ -115,34 +119,79 @@ async function login(client, data) {
 }
 
 async function register(client, data, data1){
-  if(data1.role == 'Admin') {
-    console.log(data)
+  if(data.role == 'Admin') {
     const result = await client.db("visitor-management-system").collection("Users").insertOne({
-      username:data.username,
-      password:data.password,
-      name:data.name,
-      email:data.email,
-      role:'Host'
+      username:data1.username,
+      password:data1.password,
+      name:data1.name,
+      email:data1.email,
+      role:'Host',
     })
   }
-
-  if(data1.role == 'Host') {
+  if(data.role == 'Host') {
     const result = await client.db("visitor-management-system").collection("Users").insertOne({
-      username:data.username,
-      password:data.password,
-      name:data.name,
-      email:data.email,
+      username:data1.username,
+      password:data1.password,
+      name:data1.name,
+      email:data1.email,
       role:'Visitor',
-      host:data1.username
+      host:data.username,
+      //records:[]
     })
   }
+}
+
+async function read(client, data) {
+  if(data.role == 'Admin') {
+    result = await client.db('visitor-management-system').collection('Users').find().toArray()
+    return result
+    //result = await client.db('visitor-management-system').collection('Record').find()
+    //console.log(result)
+    }
+
+  if (data.role == 'Host') {
+    result = await client.db('visitor-management-system').collection('Users').find({host: data.username}).toArray()
+    return result
+    }
+
+  if (data.role == 'Visitor') {
+    result = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+    return result
+  }
+}
+
+async function update(client, data, data1){
+  result = await client.db("visitor-management-system").collection("Users").updateOne({username: data.username}, {$set: data1});
+}
+
+async function deleteUser(client, data) {
+  result = await client.db("visitor-management-system").collection("Users").deleteOne({username: data.username});
+  return "delete success"
+}
+
+async function checkIn(client, data, data1) {
+  const result = await client.db("visitor-management-system").collection("Records").insertOne(
+    {recordID: data1.recordID,
+    checkInTime: new Date()}
+    )
+
+  const result1 = await client.db("visitor-management-system").collection("Users").updateOne(
+    {username: data.username},
+    {$push:{ records: data1.recordID }
+  })
+}
+
+async function checkOut(client, data) {
+  const result = await client.db("visitor-management-system").collection("Records").updateOne(
+    {recordID: data.recordID},
+    {$set:{ checkOutTime: new Date() }
+  })
 }
 
 //to verify JWT Token
 function verifyToken(req, res, next){
   let header = req.headers.authorization
   //to paste it in the cmd
-  console.log(header);
 
   //split the bearer token 
   // take the index 1 , to exclude the bearer words
@@ -152,7 +201,6 @@ function verifyToken(req, res, next){
       if(err){
           res.send('Invalid token')
       }
-      console.log(decoded);
       //so that can return req.user to use in the client 
       req.user = decoded
       next()

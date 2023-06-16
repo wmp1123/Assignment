@@ -1,11 +1,11 @@
-POST http://localhost:3000/register1
+POST http://localhost:3000/registerAdmin
 Content-Type: application/json
 
 {
-    "username":"A_1",
+    "username":"A_2",
     "password":"1234",
-    "name":"Boss",
-    "email":"Admin@gmail.com",
+    "name":"Boss2",
+    "email":"Boss2@gmail.com",
     "role":"Admin"
 }
 
@@ -14,18 +14,52 @@ POST http://localhost:3000/login1
 Content-Type: application/json
 
 {
-    "username":"H_1",
+    "username":"V_2",
     "password":"1234"
 }
 
 ###
 POST http://localhost:3000/register
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiNDRiM2ViODA5ZTk5Y2EwNDg5MzciLCJ1c2VybmFtZSI6IkhfMSIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJFbXBsb3llZSIsImVtYWlsIjoiSG9zdEBnbWFpbC5jb20iLCJyb2xlIjoiSG9zdCIsImlhdCI6MTY4Njg0ODc1NywiZXhwIjoxNjg2ODUyMzU3fQ.oYSqUUdTYxv2hczp95fjEss0T1xkp2x_uTalgfmu5k0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiNDRiM2ViODA5ZTk5Y2EwNDg5MzciLCJ1c2VybmFtZSI6IkhfMSIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJFbXBsb3llZSIsImVtYWlsIjoiSG9zdEBnbWFpbC5jb20iLCJyb2xlIjoiSG9zdCIsImlhdCI6MTY4Njg5NTI3MiwiZXhwIjoxNjg2ODk4ODcyfQ.2_BlrBN5Eci7LbRHCR7g0cX10qo0biYLYysDR6VIWgM
 Content-Type: application/json
 
 {
-    "username":"V_1",
+    "username":"V_2",
     "password":"1234",
-    "name":"Visitor",
-    "email":"Visitor@gmail.com"
+    "name":"Visitor2",
+    "email":"Visitor2@gmail.com"
+}
+
+###
+GET http://localhost:3000/read
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiZmM3YzMwOGZmY2NiYzVjZjhiMjQiLCJ1c2VybmFtZSI6IlZfMiIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJWaXNpdG9yMiIsImVtYWlsIjoiVmlzaXRvcjJAZ21haWwuY29tIiwicm9sZSI6IlZpc2l0b3IiLCJob3N0IjoiSF8xIiwiaWF0IjoxNjg2ODk1NzQyLCJleHAiOjE2ODY4OTkzNDJ9.4wwPGVmIiSH32KQuga_79ESfJGSSIFIEcR2oVO8K3kQ
+###
+PATCH http://localhost:3000/update
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+    "email":"Visitor5@gmail.com",
+    "name": "Visitor5"
+}
+
+###
+DELETE http://localhost:3000/deleteUser
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiYzc1YTQyMjMzZTM1MGRjOWFkOTkiLCJ1c2VybmFtZSI6IlZfMyIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJWaXNpdG9yMyIsImVtYWlsIjoiVmlzaXRvcjNAZ21haWwuY29tIiwicm9sZSI6IlZpc2l0b3IiLCJob3N0IjoiSF8xIiwiaWF0IjoxNjg2ODgyMTYxLCJleHAiOjE2ODY4ODU3NjF9.MMzpuwuie8hvuAOkcBEhYRdgkWY3OEI_neUEHEVnucc
+
+###
+POST http://localhost:3000/checkIn
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiZmM3YzMwOGZmY2NiYzVjZjhiMjQiLCJ1c2VybmFtZSI6IlZfMiIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJWaXNpdG9yMiIsImVtYWlsIjoiVmlzaXRvcjJAZ21haWwuY29tIiwicm9sZSI6IlZpc2l0b3IiLCJob3N0IjoiSF8xIiwiaWF0IjoxNjg2ODk1NzQyLCJleHAiOjE2ODY4OTkzNDJ9.4wwPGVmIiSH32KQuga_79ESfJGSSIFIEcR2oVO8K3kQ
+Content-Type: application/json
+
+{
+    "recordID":"R_1"
+}
+
+###
+PATCH http://localhost:3000/checkOut
+Content-Type: application/json
+
+{
+    "recordID":"R_1"
 }
