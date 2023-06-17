@@ -2,10 +2,11 @@ POST http://localhost:3000/registerAdmin
 Content-Type: application/json
 
 {
-    "username":"A_2",
+    "username":"A_1",
     "password":"1234",
-    "name":"Boss2",
-    "email":"Boss2@gmail.com",
+    "name":"Boss",
+    "email":"Boss@gmail.com",
+    "phoneNumber":"0123456789",
     "role":"Admin"
 }
 
@@ -14,25 +15,27 @@ POST http://localhost:3000/login1
 Content-Type: application/json
 
 {
-    "username":"V_2",
+    "username":"V_1",
     "password":"1234"
 }
 
 ###
 POST http://localhost:3000/register
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiNDRiM2ViODA5ZTk5Y2EwNDg5MzciLCJ1c2VybmFtZSI6IkhfMSIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJFbXBsb3llZSIsImVtYWlsIjoiSG9zdEBnbWFpbC5jb20iLCJyb2xlIjoiSG9zdCIsImlhdCI6MTY4Njg5NTI3MiwiZXhwIjoxNjg2ODk4ODcyfQ.2_BlrBN5Eci7LbRHCR7g0cX10qo0biYLYysDR6VIWgM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhlMGZmYjIyYzNmNDljNjQ3YTNjMTgiLCJ1c2VybmFtZSI6IkhfMSIsInBhc3N3b3JkIjoiJDJiJDEwJG5QLkQxL2JZLkRXanFQL1ZPOC9Pek8ySHVOSlN5NG9DOGtzNTFLaDJIMHByOXRzb2RNUWY2IiwibmFtZSI6Ikhvc3QxIiwiZW1haWwiOiJIb3N0MUBnbWFpbC5jb20iLCJyb2xlIjoiSG9zdCIsImlhdCI6MTY4NzAzMTgwOSwiZXhwIjoxNjg3MDM1NDA5fQ.xMOcwIg30GGVGjUfQJ65W-iG-DBNoDgoam0SPFgrzO4
 Content-Type: application/json
 
 {
-    "username":"V_2",
+    "username":"V_1",
     "password":"1234",
-    "name":"Visitor2",
-    "email":"Visitor2@gmail.com"
+    "name":"Visitor1",
+    "email":"Visitor1@gmail.com",
+    "phoneNumber":"0123456789"
 }
 
 ###
 GET http://localhost:3000/read
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiZmM3YzMwOGZmY2NiYzVjZjhiMjQiLCJ1c2VybmFtZSI6IlZfMiIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJWaXNpdG9yMiIsImVtYWlsIjoiVmlzaXRvcjJAZ21haWwuY29tIiwicm9sZSI6IlZpc2l0b3IiLCJob3N0IjoiSF8xIiwiaWF0IjoxNjg2ODk1NzQyLCJleHAiOjE2ODY4OTkzNDJ9.4wwPGVmIiSH32KQuga_79ESfJGSSIFIEcR2oVO8K3kQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhlMGY2NzU2MzVmNjM3NjdmZjg5OGIiLCJ1c2VybmFtZSI6IkFfMSIsInBhc3N3b3JkIjoiJDJiJDEwJHIzRnROTm1uWWRYQTVFQkVnNGExeWUvUjlIRzB0V2NZRWtORExXSFJQb1V1NVlLOTN6SXBpIiwibmFtZSI6IkJvc3MiLCJlbWFpbCI6IkJvc3NAZ21haWwuY29tIiwicGhvbmVOdW1iZXIiOiIwMTIzNDU2Nzg5Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNjg3MDMxNzQ4LCJleHAiOjE2ODcwMzUzNDh9.X5lD9icv6JbKcFhFvljpUcS8Bqg4E4tHiAdgSKljOBM
+
 ###
 PATCH http://localhost:3000/update
 Authorization: Bearer 
@@ -49,7 +52,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiYzc1Y
 
 ###
 POST http://localhost:3000/checkIn
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhiZmM3YzMwOGZmY2NiYzVjZjhiMjQiLCJ1c2VybmFtZSI6IlZfMiIsInBhc3N3b3JkIjoiMTIzNCIsIm5hbWUiOiJWaXNpdG9yMiIsImVtYWlsIjoiVmlzaXRvcjJAZ21haWwuY29tIiwicm9sZSI6IlZpc2l0b3IiLCJob3N0IjoiSF8xIiwiaWF0IjoxNjg2ODk1NzQyLCJleHAiOjE2ODY4OTkzNDJ9.4wwPGVmIiSH32KQuga_79ESfJGSSIFIEcR2oVO8K3kQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDhlMTBhOTIyYzNmNDljNjQ3YTNjMTkiLCJ1c2VybmFtZSI6IlZfMSIsInBhc3N3b3JkIjoiJDJiJDEwJE5HcktmOVdvVVkvQnlTMmRvTmlpR2VKQUVackNoY0xuZnFIZURUMEwwalJyWC5LdDJjVEwyIiwibmFtZSI6IlZpc2l0b3IxIiwiZW1haWwiOiJWaXNpdG9yMUBnbWFpbC5jb20iLCJyb2xlIjoiVmlzaXRvciIsImhvc3QiOiJIXzEiLCJpYXQiOjE2ODcwMzE5ODMsImV4cCI6MTY4NzAzNTU4M30.AhdvrON22Id7mbHeRG_jkkGmrPYBt8QJU1d6Uvfs-ZE
 Content-Type: application/json
 
 {

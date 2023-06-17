@@ -4,6 +4,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const app = express();
 const port = 3000;
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -36,13 +38,8 @@ async function run() {
     }) 
 
     app.post('/login1', async (req, res) => {
-      let data = req.body,
-      returned = await login(client, data)
-      role = returned.temporary
-      token = returned.token
-
-      res.send({'You are logged in as ':role})
-      console.log(token)
+      let data = req.body
+       res.send(await login(client, data))
     })
 
     app.post('/register', verifyToken, async (req, res) => {
@@ -99,17 +96,17 @@ function generateToken(userProfile){
 }
 
 async function registerAdmin(client, data) {
+  data.password = await encryptPassword(data.password)
+  console.log(data.password)
   const result = await client.db("visitor-management-system").collection("Users").insertOne(data);
 }
 
 async function login(client, data) {
   let match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
-  temporary = match.role
   if (match) {
-    const result = data.password === match.password
-    if (result) {
-      token = generateToken(match)
-      return {token, temporary}
+    if (await decryptPassword(data.password, match.password)) {
+      console.log(generateToken(match))
+      return (`You are logged in as '${match.role}'`)
     } else {
       return "Wrong password"
     }
@@ -118,55 +115,71 @@ async function login(client, data) {
   }
 }
 
+async function encryptPassword(password) {
+  const hash = await bcrypt.hash(password, saltRounds); 
+  return hash 
+}
+
+async function decryptPassword(password, compare) {
+  const match = await bcrypt.compare(password, compare)
+  return match
+}
+
 async function register(client, data, data1){
   if(data.role == 'Admin') {
     const result = await client.db("visitor-management-system").collection("Users").insertOne({
       username:data1.username,
-      password:data1.password,
+      password:await encryptPassword(data1.password),
       name:data1.name,
       email:data1.email,
       role:'Host',
     })
+    return "Host registered successfully"
   }
   if(data.role == 'Host') {
     const result = await client.db("visitor-management-system").collection("Users").insertOne({
       username:data1.username,
-      password:data1.password,
+      password:await encryptPassword(data1.password),
       name:data1.name,
       email:data1.email,
       role:'Visitor',
       host:data.username,
-      //records:[]
     })
+    return "Visitor registered successfully"
   }
 }
 
 async function read(client, data) {
   if(data.role == 'Admin') {
-    result = await client.db('visitor-management-system').collection('Users').find().toArray()
-    return result
-    //result = await client.db('visitor-management-system').collection('Record').find()
-    //console.log(result)
+    Admins = await client.db('visitor-management-system').collection('Users').find({role:"Admin"}).toArray()
+    Hosts = await client.db('visitor-management-system').collection('Users').find({role:"Host"}).toArray()
+    Visitors = await client.db('visitor-management-system').collection('Users').find({role:"Visitor"}).toArray()
+    Records = await client.db('visitor-management-system').collection('Records').find().toArray()
+    return {Admins, Hosts, Visitors, Records}
     }
 
   if (data.role == 'Host') {
-    result = await client.db('visitor-management-system').collection('Users').find({host: data.username}).toArray()
-    return result
+    Host = await client.db('visitor-management-system').collection('Users').find({username: data.username}).toArray()
+    Visitors = await client.db('visitor-management-system').collection('Users').find({host: data.username}).toArray()
+    Records = await client.db('visitor-management-system').collection('Records').find().toArray()
+    return {Host, Visitors, Records}
     }
 
   if (data.role == 'Visitor') {
-    result = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
-    return result
+    Visitor = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+    Records = await client.db('visitor-management-system').collection('Records').find({recordID: {$in:data.records}}).toArray()
+    return {User, Records}
   }
 }
 
 async function update(client, data, data1){
   result = await client.db("visitor-management-system").collection("Users").updateOne({username: data.username}, {$set: data1});
+  return 'Update Successfully'
 }
 
 async function deleteUser(client, data) {
   result = await client.db("visitor-management-system").collection("Users").deleteOne({username: data.username});
-  return "delete success"
+  return "Delete Successfully"
 }
 
 async function checkIn(client, data, data1) {
@@ -179,6 +192,7 @@ async function checkIn(client, data, data1) {
     {username: data.username},
     {$push:{ records: data1.recordID }
   })
+  return (`You have checked in at '${new Date()}'`)
 }
 
 async function checkOut(client, data) {
@@ -186,6 +200,7 @@ async function checkOut(client, data) {
     {recordID: data.recordID},
     {$set:{ checkOutTime: new Date() }
   })
+  return (`You have checked out at '${new Date()}'`)
 }
 
 //to verify JWT Token
@@ -207,8 +222,5 @@ function verifyToken(req, res, next){
   });
 }
 
-async function encryptPassword(password) {
-  const hash = await bcrypt.hash(password, saltRounds);  
-  return hash
-}
+
 
