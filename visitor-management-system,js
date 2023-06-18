@@ -213,20 +213,24 @@ async function checkIn(client, data, data1) {
 }
 
 async function checkOut(client, data) {
-  result = await client.db("visitor-management-system").collection("Records").updateOne(
-    {recordID: data.currentCheckIn},
-    {$set:{ checkOutTime: new Date() }}
-  )
-  console.log(data.currentCheckIn)
+  if(currentCheckIn) {
+    result = await client.db("visitor-management-system").collection("Records").updateOne(
+      {recordID: data.currentCheckIn},
+      {$set:{ checkOutTime: new Date() }}
+    )
+    console.log(data.currentCheckIn)
 
-  result = await client.db("visitor-management-system").collection("Users").updateOne(
-    {username: data.username}, {$unset:{ currentCheckIn: 1 }}
-  )
+    result = await client.db("visitor-management-system").collection("Users").updateOne(
+      {username: data.username}, {$unset:{ currentCheckIn: 1 }}
+    )
 
-  match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
-  console.log(`new token: ${generateToken(match)}`)
+    match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
+    console.log(`new token: ${generateToken(match)}`)
 
-  return (`You have checked out at '${new Date()}'`)
+    return (`You have checked out at '${new Date()}'`)
+  } else {
+    return 'You did not check in yet, please check in first!!!'
+  }
 }
 
 //to verify JWT Token
