@@ -46,13 +46,11 @@ async function run() {
       let data = req.user,
       data1 = req.body
       res.send(await register(client, data, data1))
-      //data.password = await encryptPassword(data.password)
     }) 
 
     app.get('/read', verifyToken, async (req, res) => {
       let data = req.user
       res.send(await read(client, data))
-      //data.password = await encryptPassword(data.password)
     }) 
 
     app.patch('/update', verifyToken, async (req,res) => {
@@ -72,8 +70,8 @@ async function run() {
       res.send(await checkIn(client, data, data1 ))
     })
 
-    app.patch('/checkOut', async(req,res) => {
-      let data = req.body
+    app.patch('/checkOut', verifyToken, async(req,res) => {
+      let data = req.user
       res.send(await checkOut(client, data))
     })
 
@@ -97,7 +95,6 @@ function generateToken(userProfile){
 
 async function registerAdmin(client, data) {
   data.password = await encryptPassword(data.password)
-  console.log(data.password)
   const result = await client.db("visitor-management-system").collection("Users").insertOne(data);
 }
 
@@ -144,6 +141,11 @@ async function register(client, data, data1){
       email:data1.email,
       role:'Visitor',
       host:data.username,
+      records: []
+    })
+    const result1 = await client.db("visitor-management-system").collection("Users").updateOne(
+      {username: data.username},
+      {$push:{visitors: data1.username }
     })
     return "Visitor registered successfully"
   }
@@ -167,13 +169,15 @@ async function read(client, data) {
 
   if (data.role == 'Visitor') {
     Visitor = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
-    Records = await client.db('visitor-management-system').collection('Records').find({recordID: {$in:data.records}}).toArray()
-    return {User, Records}
+    Records = await client.db('visitor-management-system').collection('Records').find({username: data.username}).toArray()
+    return {Visitor, Records}
   }
 }
 
 async function update(client, data, data1){
   result = await client.db("visitor-management-system").collection("Users").updateOne({username: data.username}, {$set: data1});
+  match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
+  console.log(`new token: ${generateToken(match)}`)
   return 'Update Successfully'
 }
 
@@ -183,23 +187,45 @@ async function deleteUser(client, data) {
 }
 
 async function checkIn(client, data, data1) {
-  const result = await client.db("visitor-management-system").collection("Records").insertOne(
-    {recordID: data1.recordID,
-    checkInTime: new Date()}
-    )
+  if(data.currentCheckIn) {
+    return 'Already checked in, please check out first!!!'
+  } else {
+    result = await client.db("visitor-management-system").collection("Records").insertOne(
+      { username: data.username,
+      recordID: data1.recordID,
+      purpose: data1.purpose,
+      checkInTime: new Date()
+    })
 
-  const result1 = await client.db("visitor-management-system").collection("Users").updateOne(
-    {username: data.username},
-    {$push:{ records: data1.recordID }
-  })
-  return (`You have checked in at '${new Date()}'`)
+    result = await client.db("visitor-management-system").collection("Users").updateOne(
+      {username: data.username}, {$set:{ currentCheckIn: data1.recordID }
+      })
+
+    result = await client.db("visitor-management-system").collection("Users").updateOne(
+      {username: data.username},
+      {$push:{records: data1.recordID }
+    })
+
+    match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
+    console.log(`new token: ${generateToken(match)}`)
+    return (`You have checked in at '${new Date()}'`)
+  }
 }
 
 async function checkOut(client, data) {
-  const result = await client.db("visitor-management-system").collection("Records").updateOne(
-    {recordID: data.recordID},
-    {$set:{ checkOutTime: new Date() }
-  })
+  result = await client.db("visitor-management-system").collection("Records").updateOne(
+    {recordID: data.currentCheckIn},
+    {$set:{ checkOutTime: new Date() }}
+  )
+  console.log(data.currentCheckIn)
+
+  result = await client.db("visitor-management-system").collection("Users").updateOne(
+    {username: data.username}, {$unset:{ currentCheckIn: 1 }}
+  )
+
+  match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
+  console.log(`new token: ${generateToken(match)}`)
+
   return (`You have checked out at '${new Date()}'`)
 }
 
