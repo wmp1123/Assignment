@@ -102,7 +102,7 @@ async function login(client, data) {
   let match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
   if (match) {
     if (await decryptPassword(data.password, match.password)) {
-      console.log("Token for "+match.role+": "+generateToken(match))
+      console.log("Token for "+match.name+": "+generateToken(match))
       return output(match.role)
     } else {
       return "Wrong password"
@@ -151,6 +151,8 @@ async function register(client, data, data1){
         {$push:{visitors: data1.username }
       })
       return "Visitor registered successfully"
+    } else {
+      return "You are not allowed to register"
     }
   } else {
     return "Username is used"
@@ -181,8 +183,11 @@ async function read(client, data) {
 }
 
 async function update(client, data, data1){
+  if (data1.password) {
+    data1.password = await encryptPassword(data1.password)
+  }
   result = await client.db("visitor-management-system").collection("Users").updateOne({username: data.username}, {$set: data1});
-  match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
+  return "Update Successfully"
 }
 
 async function deleteUser(client, data) {
