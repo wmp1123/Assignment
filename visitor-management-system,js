@@ -102,8 +102,8 @@ async function login(client, data) {
   let match = await client.db("visitor-management-system").collection("Users").findOne({username: data.username})
   if (match) {
     if (await decryptPassword(data.password, match.password)) {
-      console.log("Token for "+match.name+": "+generateToken(match))
-      return output(match.role)
+      message = "\nToken for "+match.name+": "+generateToken(match)
+      return output(match.role, message)
     } else {
       return "Wrong password"
     }
@@ -160,25 +160,30 @@ async function register(client, data, data1){
 }
 
 async function read(client, data) {
-  if(data.role == 'Admin') {
-    Admins = await client.db('visitor-management-system').collection('Users').find({role:"Admin"}).next() //.next to read in object instead of array
-    Hosts = await client.db('visitor-management-system').collection('Users').find({role:"Host"}).toArray()
-    Visitors = await client.db('visitor-management-system').collection('Users').find({role:"Visitor"}).toArray()
-    Records = await client.db('visitor-management-system').collection('Records').find().next()
-    return {Admins, Hosts, Visitors, Records}
-    }
+  temporary = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+  if (temporary) {
+    if(data.role == 'Admin') {
+      Admins = await client.db('visitor-management-system').collection('Users').find({role:"Admin"}).next() //.next to read in object instead of array
+      Hosts = await client.db('visitor-management-system').collection('Users').find({role:"Host"}).toArray()
+      Visitors = await client.db('visitor-management-system').collection('Users').find({role:"Visitor"}).toArray()
+      Records = await client.db('visitor-management-system').collection('Records').find().next()
+      return {Admins, Hosts, Visitors, Records}
+      }
 
-  if (data.role == 'Host') {
-    Host = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
-    Visitors = await client.db('visitor-management-system').collection('Users').find({host: data.username}).toArray()   
-    Records = await client.db('visitor-management-system').collection('Records').find({username: {$in:Host.visitors}}).toArray()
-    return {Host, Visitors, Records}
-    }
+    if (data.role == 'Host') {
+      Host = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+      Visitors = await client.db('visitor-management-system').collection('Users').find({host: data.username}).toArray()   
+      Records = await client.db('visitor-management-system').collection('Records').find({username: {$in:Host.visitors}}).toArray()
+      return {Host, Visitors, Records}
+      }
 
-  if (data.role == 'Visitor') {
-    Visitor = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
-    Records = await client.db('visitor-management-system').collection('Records').find({recordID: {$in:Visitor.records}}).toArray()
-    return {Visitor, Records}
+    if (data.role == 'Visitor') {
+      Visitor = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+      Records = await client.db('visitor-management-system').collection('Records').find({recordID: {$in:Visitor.records}}).toArray()
+      return {Visitor, Records}
+    }
+  } else {
+    return 'User not found'
   }
 }
 
@@ -201,13 +206,13 @@ async function deleteUser(client, data) {
 }
 
 async function checkIn(client, data, data1) {
-  temporary = await client.db('visitor-management-system').collection('Users').findOne({recordID: data1.recordID})
-  if(!temporary) {
-    if(data.role == 'Visitor') {
-      temporary = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+  temporary = await client.db('visitor-management-system').collection('Users').findOne({username: data.username})
+  if(temporary.role == 'Visitor') {
       if(temporary.currentCheckIn) {
         return 'Already checked in, please check out first!!!'
       } else {
+      temporary = await client.db('visitor-management-system').collection('Records').findOne({recordID: data1.recordID})
+      if(!temporary) {
         result = await client.db("visitor-management-system").collection("Records").insertOne(
           { username: data.username,
           recordID: data1.recordID,
@@ -225,12 +230,12 @@ async function checkIn(client, data, data1) {
         })  
 
         return (`You have checked in at '${new Date()}'`)
+      } else {
+        return 'recordID in use, please enter another recordID'
       }
-    } else {
-      return 'Only visitor can access to check in'
     }
   } else {
-    return 'recordID in use, please enter another recordID'
+    return 'Only visitor can access to check in'
   }
 }
 
@@ -251,13 +256,13 @@ async function checkOut(client, data) {
   }
 }
 
-function output(data) {
+function output(data, message) {
   if(data == 'Admin') {
-    return "You are logged in as Admin\n You can:\n 1.Register Host\n 2. Read All Users and Records"
+    return message+"\n\nYou are logged in as Admin\n You can:\n 1. Register Host\n 2. Read All Users and Records"
   } else if (data == 'Host') {
-    return "You are logged in as Host\n You can:\n 1.Register Visitor\n 2. Check My Data, My Visitors and Their Records' Data\n 3. Update My Data\n 4. Delete My Data\n"
+    return message+"\n\nYou are logged in as Host\n You can:\n 1. Register Visitor\n 2. Check My Data, My Visitors and Their Records' Data\n 3. Update My Data\n 4. Delete My Data\n"
   } else if (data == 'Visitor') {
-    return "You are logged in as Visitor\n You can:\n 1. Check My Data and My Records\n 3. Update My Data\n 4. Check In\n 5. Check Out\n 6. Delete My Data"
+    return message+"\n\nYou are logged in as Visitor\n You can:\n 1. Check My Data and My Records\n 3. Update My Data\n 4. Check In\n 5. Check Out\n 6. Delete My Data"
   }
 }
 
@@ -279,6 +284,3 @@ function verifyToken(req, res, next){
       next()
   });
 }
-
-
-
